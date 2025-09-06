@@ -1,20 +1,6 @@
-// Temporarily disable NextAuth route to fix build
-// TODO: Fix NextAuth compatibility with Next.js 15
+import NextAuth from "next-auth/next";
+import { authOptions } from "@/lib/auth";
 
-import { NextRequest, NextResponse } from "next/server";
+const handler = NextAuth(authOptions);
 
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-export async function GET(_request: NextRequest) {
-  return NextResponse.json(
-    { error: "NextAuth temporarily disabled" },
-    { status: 503 }
-  );
-}
-
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-export async function POST(_request: NextRequest) {
-  return NextResponse.json(
-    { error: "NextAuth temporarily disabled" },
-    { status: 503 }
-  );
-}
+export { handler as GET, handler as POST };
