@@ -1,60 +1,68 @@
-import GoogleProvider from "next-auth/providers/google";
-import { MongoDBAdapter } from "@auth/mongodb-adapter";
-import { MongoClient } from "mongodb";
+import jwt from "jsonwebtoken";
+import bcrypt from "bcryptjs";
+import { NextRequest } from "next/server";
 
-const client = new MongoClient(process.env.MONGODB_URI!);
-const clientPromise = Promise.resolve(client);
+const JWT_SECRET = process.env.JWT_SECRET || "your-super-secret-jwt-key";
+const JWT_EXPIRES_IN = "7d";
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export const authOptions: any = {
-  adapter: MongoDBAdapter(clientPromise),
-  providers: [
-    GoogleProvider({
-      clientId: process.env.GOOGLE_CLIENT_ID!,
-      clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
-      authorization: {
-        params: {
-          prompt: "consent",
-          access_type: "offline",
-          response_type: "code",
-        },
-      },
-    }),
-  ],
-  session: {
-    strategy: "jwt",
-  },
-  callbacks: {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    async jwt({ token, user, account }: any) {
-      if (user) {
-        token.id = user.id;
-      }
-      if (account?.provider === "google") {
-        token.accessToken = account.access_token;
-      }
-      return token;
-    },
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    async session({ session, token }: any) {
-      if (token) {
-        session.user.id = token.id as string;
-        session.accessToken = token.accessToken as string;
-      }
-      return session;
-    },
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    async signIn({ account }: any) {
-      // Allow all Google sign-ins
-      if (account?.provider === "google") {
-        return true;
-      }
-      return true;
-    },
-  },
-  pages: {
-    signIn: "/auth/login",
-    error: "/auth/error", // Error code passed in query string as ?error=
-  },
-  debug: process.env.NODE_ENV === "development",
-};
+export interface JWTPayload {
+  userId: string;
+  email: string;
+  name: string;
+  iat?: number;
+  exp?: number;
+}
+
+export class AuthService {
+  static generateToken(payload: Omit<JWTPayload, "iat" | "exp">): string {
+    return jwt.sign(payload, JWT_SECRET, { expiresIn: JWT_EXPIRES_IN });
+  }
+
+  static verifyToken(token: string): JWTPayload | null {
+    try {
+      return jwt.verify(token, JWT_SECRET) as JWTPayload;
+    } catch (error) {
+      console.error("JWT verification failed:", error);
+      return null;
+    }
+  }
+
+  static async hashPassword(password: string): Promise<string> {
+    return bcrypt.hash(password, 12);
+  }
+
+  static async comparePassword(
+    password: string,
+    hashedPassword: string
+  ): Promise<boolean> {
+    return bcrypt.compare(password, hashedPassword);
+  }
+
+  static extractTokenFromRequest(request: NextRequest): string | null {
+    // Check Authorization header
+    const authHeader = request.headers.get("authorization");
+    if (authHeader && authHeader.startsWith("Bearer ")) {
+      return authHeader.substring(7);
+    }
+
+    // Check cookies
+    const tokenCookie = request.cookies.get("auth-token");
+    if (tokenCookie) {
+      return tokenCookie.value;
+    }
+
+    return null;
+  }
+
+  static getUserFromRequest(request: NextRequest): JWTPayload | null {
+    const token = this.extractTokenFromRequest(request);
+    if (!token) return null;
+
+    return this.verifyToken(token);
+  }
+}
+
+// Middleware helper for protecting routes
+export function requireAuth(request: NextRequest): JWTPayload | null {
+  return AuthService.getUserFromRequest(request);
+}

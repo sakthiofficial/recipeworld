@@ -5,6 +5,7 @@ export interface IUser extends Document {
   email: string;
   password?: string;
   avatar?: string;
+  profilePicture?: string;
   followers: string[];
   following: string[];
 }
@@ -15,6 +16,7 @@ const UserSchema: Schema = new Schema(
     email: { type: String, required: true, unique: true },
     password: { type: String },
     avatar: { type: String },
+    profilePicture: { type: String },
     followers: [{ type: Schema.Types.ObjectId, ref: "User" }],
     following: [{ type: Schema.Types.ObjectId, ref: "User" }],
   },

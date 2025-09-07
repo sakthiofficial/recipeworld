@@ -69,9 +69,9 @@ export default function SignupPage() {
         password: formData.password
       }).unwrap();
       
-      if (result.success && result.user && result.token) {
+      if (result.success && result.user ) {
         // Store authentication data using AuthUtils
-        AuthUtils.login(result.user, result.token);
+        AuthUtils.login(result.user);
         
         setSuccessMessage('Account created successfully! Redirecting...');
         

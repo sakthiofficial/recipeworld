@@ -1,91 +1,98 @@
-import { useState, useEffect } from "react";
-import { useSession } from "next-auth/react";
-import { AuthUtils, AuthUser } from "@/lib/authUtils";
+import { useState } from "react";
+import { useSession } from "@/components/SessionProvider";
+import {
+  useLoginMutation,
+  useLogoutMutation,
+  useSignupMutation,
+} from "@/features/auth/authApi";
+
+interface AuthUser {
+  id: string;
+  name: string;
+  email: string;
+  profilePicture?: string;
+  avatar?: string;
+}
 
 interface UseAuthReturn {
   user: AuthUser | null;
   isAuthenticated: boolean;
   isLoading: boolean;
-  login: (user: AuthUser, token: string) => void;
-  logout: () => void;
+  login: (credentials: { email: string; password: string }) => Promise<void>;
+  signup: (userData: {
+    name: string;
+    email: string;
+    password: string;
+  }) => Promise<void>;
+  logout: () => Promise<void>;
+  error: string | null;
 }
 
 export function useAuth(): UseAuthReturn {
-  const { data: session, status } = useSession();
-  const [localUser, setLocalUser] = useState<AuthUser | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
+  const { user, loading, refetch } = useSession();
+  const [loginMutation] = useLoginMutation();
+  const [signupMutation] = useSignupMutation();
+  const [logoutMutation] = useLogoutMutation();
+  const [error, setError] = useState<string | null>(null);
 
-  // Check for local authentication
-  useEffect(() => {
-    const checkLocalAuth = () => {
-      const user = AuthUtils.getUser();
-      const token = AuthUtils.getToken();
-
-      console.log("useAuth checkLocalAuth - user:", user);
-      console.log("useAuth checkLocalAuth - token:", token);
-
-      if (user && token) {
-        setLocalUser(user);
-      } else {
-        setLocalUser(null);
+  const login = async (credentials: { email: string; password: string }) => {
+    try {
+      setError(null);
+      const result = await loginMutation(credentials).unwrap();
+      if (!result.success) {
+        throw new Error(result.message);
       }
-
-      // Set loading to false once we've checked both NextAuth and local auth
-      if (status !== "loading") {
-        setIsLoading(false);
-      }
-    };
-
-    checkLocalAuth();
-
-    // Listen for auth state changes
-    const handleAuthChange = () => {
-      checkLocalAuth();
-    };
-
-    window.addEventListener("authStateChange", handleAuthChange);
-    window.addEventListener("storage", handleAuthChange);
-
-    return () => {
-      window.removeEventListener("authStateChange", handleAuthChange);
-      window.removeEventListener("storage", handleAuthChange);
-    };
-  }, [status]);
-
-  // Update loading state based on NextAuth status
-  useEffect(() => {
-    if (status !== "loading") {
-      setIsLoading(false);
+      // Immediately refetch to update the session state
+      refetch();
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : "Login failed";
+      setError(errorMessage);
+      throw err;
     }
-  }, [status]);
-
-  const login = (user: AuthUser, token: string) => {
-    AuthUtils.login(user, token);
-    setLocalUser(user);
   };
 
-  const logout = () => {
-    AuthUtils.logout();
-    setLocalUser(null);
-  };
-
-  // Determine final auth state - prioritize NextAuth session
-  const user = session?.user
-    ? {
-        id: (session.user as { id?: string }).id || session.user.email || "",
-        name: session.user.name || "",
-        email: session.user.email || "",
-        avatar: session.user.image || undefined,
+  const signup = async (userData: {
+    name: string;
+    email: string;
+    password: string;
+  }) => {
+    try {
+      setError(null);
+      const result = await signupMutation(userData).unwrap();
+      if (!result.success) {
+        throw new Error(result.message);
       }
-    : localUser;
+      // Immediately refetch to update the session state
+      refetch();
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : "Signup failed";
+      setError(errorMessage);
+      throw err;
+    }
+  };
 
-  const isAuthenticated = !!(session?.user || localUser);
+  const logout = async () => {
+    try {
+      setError(null);
+      await logoutMutation().unwrap();
+      // Immediately refetch to update the session state
+      refetch();
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : "Logout failed";
+      setError(errorMessage);
+      // Even if logout fails, clear the session
+      refetch();
+      throw err;
+    }
+  };
 
   return {
     user,
-    isAuthenticated,
-    isLoading,
+    isAuthenticated: !!user,
+    isLoading: loading,
     login,
+    signup,
     logout,
+    error,
   };
 }

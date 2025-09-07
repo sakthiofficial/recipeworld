@@ -28,6 +28,7 @@ export const authApi = createApi({
   reducerPath: "authApi",
   baseQuery: fetchBaseQuery({
     baseUrl: process.env.NEXT_PUBLIC_API_URL || "/api",
+    credentials: "include", // Include cookies in requests
     prepareHeaders: (headers) => {
       headers.set("Content-Type", "application/json");
       return headers;
@@ -41,6 +42,7 @@ export const authApi = createApi({
         method: "POST",
         body: data,
       }),
+      invalidatesTags: ["User"],
     }),
     signup: builder.mutation<AuthResponse, SignupRequest>({
       query: (data) => ({
@@ -48,15 +50,27 @@ export const authApi = createApi({
         method: "PUT",
         body: data,
       }),
+      invalidatesTags: ["User"],
     }),
     logout: builder.mutation<AuthResponse, void>({
       query: () => ({
         url: "/auth",
         method: "DELETE",
       }),
+      invalidatesTags: ["User"],
+    }),
+    getCurrentUser: builder.query<AuthResponse, void>({
+      query: () => "/auth/me",
+      providesTags: ["User"],
+      // Reduce cache time for more responsive auth state
+      keepUnusedDataFor: 5, // 5 seconds instead of default 60
     }),
   }),
 });
 
-export const { useLoginMutation, useSignupMutation, useLogoutMutation } =
-  authApi;
+export const {
+  useLoginMutation,
+  useSignupMutation,
+  useLogoutMutation,
+  useGetCurrentUserQuery,
+} = authApi;

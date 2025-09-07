@@ -1,18 +1,61 @@
 'use client'
 
-import { SessionProvider as NextAuthSessionProvider } from 'next-auth/react'
+import React, { createContext, useContext, useEffect, useState } from 'react'
+import { useGetCurrentUserQuery } from '@/features/auth/authApi'
+
+interface User {
+  id: string
+  name: string
+  email: string
+  profilePicture?: string
+  avatar?: string
+}
+
+interface SessionContextType {
+  user: User | null
+  loading: boolean
+  error: string | null
+  refetch: () => void
+}
+
+const SessionContext = createContext<SessionContextType>({
+  user: null,
+  loading: true,
+  error: null,
+  refetch: () => {}
+})
+
+export const useSession = () => {
+  return useContext(SessionContext)
+}
 
 export default function SessionProvider({
   children,
-  session
 }: {
   children: React.ReactNode
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  session: any
 }) {
+  const { data, isLoading, error, refetch } = useGetCurrentUserQuery()
+  const [user, setUser] = useState<User | null>(null)
+
+  useEffect(() => {
+    if (data?.success && data.user) {
+      setUser(data.user)
+    } else if (data?.success === false || error) {
+      // If we get an explicit failure or error, clear the user
+      setUser(null)
+    }
+  }, [data, error])
+
+  const value = {
+    user,
+    loading: isLoading,
+    error: error ? 'Failed to load session' : null,
+    refetch
+  }
+
   return (
-    <NextAuthSessionProvider session={session}>
+    <SessionContext.Provider value={value}>
       {children}
-    </NextAuthSessionProvider>
+    </SessionContext.Provider>
   )
 }

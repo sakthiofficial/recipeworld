@@ -6,8 +6,10 @@ import SessionProvider from './SessionProvider';
 
 export function Providers({ children }: { children: React.ReactNode }) {
   return (
-    <SessionProvider session={null}>
-      <Provider store={store}>{children}</Provider>
-    </SessionProvider>
+    <Provider store={store}>
+      <SessionProvider>
+        {children}
+      </SessionProvider>
+    </Provider>
   );
 }

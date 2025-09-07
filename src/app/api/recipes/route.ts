@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { RecipeService } from "@/services/RecipeService";
-import { requireAuth } from "@/lib/authMiddleware";
+import { requireAuth } from "@/lib/auth";
 
 const recipeService = new RecipeService();
 
@@ -30,11 +30,11 @@ export async function GET(req: NextRequest) {
 export async function POST(req: NextRequest) {
   try {
     // Require authentication for creating recipes
-    const authResult = requireAuth(req);
-    if ("error" in authResult) {
+    const user = requireAuth(req);
+    if (!user) {
       return NextResponse.json(
-        { error: authResult.error },
-        { status: authResult.status }
+        { error: "Authentication required" },
+        { status: 401 }
       );
     }
 
@@ -43,7 +43,7 @@ export async function POST(req: NextRequest) {
     // Automatically set the author to the authenticated user
     const recipeData = {
       ...data,
-      author: authResult.userId,
+      author: user.userId,
     };
 
     const result = await recipeService.createRecipe(recipeData);
@@ -60,11 +60,11 @@ export async function POST(req: NextRequest) {
 export async function PUT(req: NextRequest) {
   try {
     // Require authentication for updating recipes
-    const authResult = requireAuth(req);
-    if ("error" in authResult) {
+    const user = requireAuth(req);
+    if (!user) {
       return NextResponse.json(
-        { error: authResult.error },
-        { status: authResult.status }
+        { error: "Authentication required" },
+        { status: 401 }
       );
     }
 
@@ -77,7 +77,7 @@ export async function PUT(req: NextRequest) {
 
     // Optional: Check if user owns the recipe before allowing update
     // const existingRecipe = await recipeService.getRecipeById(id);
-    // if (existingRecipe.author.toString() !== authResult.userId) {
+    // if (existingRecipe.author.toString() !== user.userId) {
     //   return NextResponse.json(
     //     { error: "You can only update your own recipes" },
     //     { status: 403 }
@@ -98,11 +98,11 @@ export async function PUT(req: NextRequest) {
 export async function DELETE(req: NextRequest) {
   try {
     // Require authentication for deleting recipes
-    const authResult = requireAuth(req);
-    if ("error" in authResult) {
+    const user = requireAuth(req);
+    if (!user) {
       return NextResponse.json(
-        { error: authResult.error },
-        { status: authResult.status }
+        { error: "Authentication required" },
+        { status: 401 }
       );
     }
 
@@ -113,7 +113,7 @@ export async function DELETE(req: NextRequest) {
 
     // Optional: Check if user owns the recipe before allowing deletion
     // const existingRecipe = await recipeService.getRecipeById(id);
-    // if (existingRecipe.author.toString() !== authResult.userId) {
+    // if (existingRecipe.author.toString() !== user.userId) {
     //   return NextResponse.json(
     //     { error: "You can only delete your own recipes" },
     //     { status: 403 }

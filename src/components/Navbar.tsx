@@ -3,7 +3,6 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { signOut } from 'next-auth/react';
 import { User, ChefHat, LogOut, Upload } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { InstantSearchDropdown } from './InstantSearchDropdown';
@@ -30,18 +29,16 @@ export function Navbar({}) {
     setIsDropdownOpen(false);
     
     try {
-      // Try NextAuth signout first
-      await signOut({ callbackUrl: '/', redirect: false });
+      // Use the logout function from useAuth hook
+      await logout();
+      
+      // Navigate to home page
+      router.push('/');
     } catch (error) {
-      console.log('NextAuth signout failed:', error);
+      console.error('Logout failed:', error);
+      // Still redirect to home even if logout API fails
+      router.push('/');
     }
-    
-    // Use the logout function from useAuth hook
-    logout();
-    
-    // Force navigation to home page
-    router.push('/');
-    router.refresh();
   };
 
   return (

@@ -21,7 +21,7 @@ export default function LoginModal({ isOpen, onClose, onSuccess }: LoginModalPro
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   
-  const { login } = useAuth();
+  const { login, signup } = useAuth();
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormData({
@@ -31,41 +31,31 @@ export default function LoginModal({ isOpen, onClose, onSuccess }: LoginModalPro
     setError(''); // Clear error when user types
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
+    const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setIsLoading(true);
     setError('');
+    setIsLoading(true);
+console.log("login submited");
 
     try {
-      const endpoint = isLogin ? '/api/auth/login' : '/api/auth/signup';
-      const payload = isLogin 
-        ? { email: formData.email, password: formData.password }
-        : { name: formData.name, email: formData.email, password: formData.password };
-
-      const response = await fetch(endpoint, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(payload),
-      });
-
-      const result = await response.json();
-
-      if (!result.success) {
-        setError(result.message || 'An error occurred');
-        return;
+      if (isLogin) {
+        // Use the login function from useAuth hook
+        await login({ email: formData.email, password: formData.password });
+      } else {
+        // Use the signup function from useAuth hook
+        await signup({ 
+          name: formData.name,
+          email: formData.email, 
+          password: formData.password 
+        });
       }
 
-      // Success - login user and close modal
-      if (result.user && result.token) {
-        login(result.user, result.token);
-      }
-      
+      // Success - close modal and let parent handle success
       onClose();
       if (onSuccess) {
         onSuccess();
       }
+      // Don't redirect automatically - let the calling component decide
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'An error occurred';
       setError(errorMessage);
