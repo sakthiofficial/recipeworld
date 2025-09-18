@@ -18,7 +18,7 @@ export default function LoginPage() {
       const result = await login({ email, password }).unwrap();
       console.log(result);
       
-      if (result.success && result.user ) {
+      if (result.success && result.user && result.token) {
         // Store authentication data using AuthUtils
         AuthUtils.login(result.user, result.token);
         
