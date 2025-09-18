@@ -34,7 +34,7 @@ function AuthErrorContent() {
         <div className="mb-6">
           <Link href="/" className="inline-flex items-center space-x-2 group">
             <ChefHat className="h-10 w-10 text-green-600 group-hover:scale-110 transition-transform" />
-            <span className="text-3xl font-bold text-gray-900">FlavorShare</span>
+            <span className="text-3xl font-bold text-gray-900">RecipeWorld</span>
           </Link>
         </div>
 

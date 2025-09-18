@@ -1,4 +1,4 @@
-# Recipe Sharing Platform - FlavorShare
+# RecipeWorld - Recipe Sharing Platform
 
 A modern, zen-like recipe sharing platform built with Next.js 15, TypeScript, Redux Toolkit, and MongoDB.
 

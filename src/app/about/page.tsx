@@ -207,7 +207,7 @@ export default function AboutPage() {
                 across different cultures and regions.
               </p>
               <p className="text-gray-700 leading-relaxed">
-                FlavorShare combines my love for cooking with cutting-edge web technologies to solve real-world 
+                RecipeWorld combines my love for cooking with cutting-edge web technologies to solve real-world 
                 problems in the culinary community. Built with Next.js 15, TypeScript, and modern design principles 
                 to deliver an exceptional user experience.
               </p>

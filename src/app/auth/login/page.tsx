@@ -37,9 +37,9 @@ export default function LoginPage() {
         <div className="text-center mb-6 sm:mb-8">
           <Link href="/" className="inline-flex items-center space-x-2 group">
             <ChefHat className="h-8 w-8 sm:h-10 sm:w-10 text-green-600 group-hover:scale-110 transition-transform" />
-            <span className="text-2xl sm:text-3xl font-bold text-gray-900">FlavorShare</span>
+            <span className="text-2xl sm:text-3xl font-bold text-gray-900">RecipeWorld</span>
           </Link>
-          <p className="text-gray-600 mt-2 text-sm sm:text-base">Welcome back to your culinary journey</p>
+          <p className="text-gray-600 mt-2 text-sm sm:text-base">Welcome back to RecipeWorld</p>
         </div>
 
         {/* Login Form */}

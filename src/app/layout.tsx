@@ -9,8 +9,8 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
-  title: "Recipe Sharing Platform",
-  description: "Discover, share, and save your favorite recipes",
+  title: "RecipeWorld",
+  description: "Discover, share, and cook amazing recipes with our interactive cooking assistant",
 };
 
 export default function RootLayout({

@@ -80,7 +80,7 @@ console.log("login submited");
           <div className="flex items-center space-x-3">
             <ChefHat className="h-8 w-8 text-green-600" />
             <h2 className="text-2xl font-bold text-gray-900">
-              {isLogin ? 'Welcome Back' : 'Join FlavorShare'}
+              {isLogin ? 'Welcome Back' : 'Join RecipeWorld'}
             </h2>
           </div>
           <button

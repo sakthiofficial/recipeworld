@@ -1,6 +1,6 @@
 # Google OAuth Setup Guide
 
-This guide will help you set up Google OAuth authentication for your Recipe Sharing Platform.
+This guide will help you set up Google OAuth authentication for RecipeWorld.
 
 ## Step 1: Create Google OAuth Credentials
 

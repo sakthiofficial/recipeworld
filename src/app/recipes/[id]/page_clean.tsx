@@ -438,7 +438,7 @@ export default function RecipeDetailPage() {
             
             <Link href="/" className="flex items-center space-x-2">
               <ChefHat className="h-6 w-6 sm:h-8 sm:w-8 text-green-600" />
-              <span className="text-lg sm:text-2xl font-bold text-gray-900 hidden xs:block">FlavorShare</span>
+              <span className="text-lg sm:text-2xl font-bold text-gray-900 hidden xs:block">RecipeWorld</span>
               <span className="text-lg font-bold text-gray-900 xs:hidden">Recipeworld</span>
             </Link>
 
